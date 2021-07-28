@@ -1,5 +1,5 @@
 let googleUserId;
-
+let testData;
 window.onload = (event) => {
   // Use this to retain user state between html pages.
   firebase.auth().onAuthStateChanged(function (user) {
@@ -24,6 +24,20 @@ const getNotes = (userId) => {
 
 const renderDataAsHtml = (data) => {
   let cards = ``;
+  //Sorting method in works
+//   let sortedCards = [];
+
+
+//   for (const noteItem in data) {
+//       const note = data[noteItem];
+//       note[key] = noteItem;
+//       sortedCards.push(note);
+//   }
+//   sortedCards.sort((noteA, noteB) => noteA.title > noteB.title ? -1 : 1);
+
+//   for (const noteItem of sortedCards) {
+//       cards += createCard(noteItem, noteItem.key)
+//   }
   for (const noteItem in data) {
     const note = data[noteItem];
     // For each note create an HTML card
@@ -68,6 +82,7 @@ const editNote = (noteId) => {
         const note = data[noteId];
         document.getElementById('editTitleInput').value = note.title;
         document.getElementById('editTextInput').value = note.text;
+        document.getElementById('editNoteId').value = noteId;
     });
     editNoteModal.classList.toggle('is-active');
 }
@@ -78,12 +93,14 @@ const closeEditModal = () => {
 }
 
 const saveEditedNote = () => {
-    const noteTitle = document.getElementById('editTitleInput');
-    const noteText = document.getElementById('editTextInput');
+    const noteTitle = document.getElementById('editTitleInput').value;
+    const noteText = document.getElementById('editTextInput').value;
+    const noteId = document.getElementById('editNoteId').value;
     const noteEdits = {
         title: noteTitle,
         text: noteText
     }
 
     firebase.database().ref(`users/${googleUserId}/${noteId}`).update(noteEdits);
+    closeEditModal();
 }
