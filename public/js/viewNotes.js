@@ -27,13 +27,13 @@ const renderDataAsHtml = (data) => {
   for (const noteItem in data) {
     const note = data[noteItem];
     // For each note create an HTML card
-    cards += createCard(note)
+    cards += createCard(note, noteItem)
   };
   // Inject our string of HTML into our viewNotes.html page
   document.querySelector('#app').innerHTML = cards;
 };
 
-const createCard = (note) => {
+const createCard = (note, noteId) => {
   return `
     <div class="column is-one-quarter">
       <div class="card">
@@ -43,7 +43,47 @@ const createCard = (note) => {
         <div class="card-content">
           <div class="content">${note.text}</div>
         </div>
+        <footer class="card-footer">
+            <a href="#" class="card-footer-item" onclick="editNote('${noteId}')">
+                Edit
+            </a>
+            <a href="#" class="card-footer-item" onclick="deleteNote('${noteId}')">
+                Delete
+            </a>
+        </footer>
       </div>
     </div>
   `;
+}
+
+const deleteNote = (noteId) => {
+    firebase.database().ref(`users/${googleUserId}/${noteId}`).remove();
+}
+
+const editNote = (noteId) => {
+    const editNoteModal = document.getElementById('editNoteModal');
+    const notesRef = firebase.database().ref(`users/${googleUserId}`);
+    notesRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        const note = data[noteId];
+        document.getElementById('editTitleInput').value = note.title;
+        document.getElementById('editTextInput').value = note.text;
+    });
+    editNoteModal.classList.toggle('is-active');
+}
+
+const closeEditModal = () => {
+    const editNoteModal = document.getElementById('editNoteModal');
+    editNoteModal.classList.toggle('is-active');
+}
+
+const saveEditedNote = () => {
+    const noteTitle = document.getElementById('editTitleInput');
+    const noteText = document.getElementById('editTextInput');
+    const noteEdits = {
+        title: noteTitle,
+        text: noteText
+    }
+
+    firebase.database().ref(`users/${googleUserId}/${noteId}`).update(noteEdits);
 }
